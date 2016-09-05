@@ -1,0 +1,17 @@
+﻿{
+  "compilerOptions": {
+    "module": "commonjs",
+    "sourceMap": false,
+    "removeComments": false,
+    "isolatedModules": false,
+    "declaration": true,
+    "noEmitOnError": true,
+    "noResolve": false,
+    "pretty": true,
+    "rootDir": "./",
+    "outDir": "../../lib/Runner"
+  },
+  "filesGlob": [
+    "**/*.ts"
+  ]
+}
