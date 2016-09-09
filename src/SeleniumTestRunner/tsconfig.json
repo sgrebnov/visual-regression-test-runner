@@ -9,7 +9,7 @@
     "noResolve": false,
     "pretty": true,
     "rootDir": "./",
-    "outDir": "../../lib/Runner"
+    "outDir": "../../lib/SeleniumTestRunner"
   },
   "filesGlob": [
     "**/*.ts"

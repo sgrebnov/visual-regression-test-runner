@@ -3,13 +3,17 @@ var rimraf = require("rimraf");
 var runSequence = require("run-sequence")
 var builder = require("./builder");
 
-var runnerTsConfigPath = __dirname + "/src/Runner/tsconfig.json";
+var runnerTsConfigPath = __dirname + "/src/SeleniumTestRunner/tsconfig.json";
 
 gulp.task("build", () => {
-    builder.build(runnerTsConfigPath);
+    return builder.build(runnerTsConfigPath);
 });
 
 gulp.task("clean", () => {
-    builder.clean(runnerTsConfigPath)
+    return builder.clean(runnerTsConfigPath)
+});
+
+gulp.task("clean-build", () => {
+    return runSequence("clean", "build");
 });
 

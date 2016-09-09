@@ -11,3 +11,5 @@
 ///<reference path="./typedefs/Promise.d.ts"/>
 ///<reference path="./typedefs/webdriverIO.d.ts"/>
 ///<reference path="./typedefs/webdriverCSS.d.ts"/>
+
+export * from "./helpers/helpers";

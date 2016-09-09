@@ -809,7 +809,7 @@ declare module "vm" {
         runInThisContext(): void;
         runInNewContext(sandbox?: Context): void;
     }
-    export function runInThisContext(code: string, filename?: string): void;
+    export function runInThisContext(code: string, filename?: string): any;
     export function runInNewContext(code: string, sandbox?: Context, filename?: string): void;
     export function runInContext(code: string, context: Context, filename?: string): void;
     export function createContext(initSandbox?: Context): Context;

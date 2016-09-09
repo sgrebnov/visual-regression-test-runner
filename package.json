@@ -27,7 +27,6 @@
     "graphics-magick-binaries": "https://github.com/DenisKudelin/GraphicsMagickBinaries.git",
     "is-appveyor": "1.0.0",
     "jasmine-core": "2.5.0",
-    "jasmine-node": "https://github.com/DenisKudelin/jasmine-node.git#Jasmine2.5",
     "jasmine-console-reporter": "1.2.7",
     "jasmine-jquery": "2.1.1",
     "jasmine-reporters": "2.2.0",

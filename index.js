@@ -1,1 +1,1 @@
-﻿module.exports = require("./lib/Runner/index");
+﻿module.exports = require("./lib/SeleniumTestRunner/index");

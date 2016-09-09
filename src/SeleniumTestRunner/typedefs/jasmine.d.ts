@@ -312,8 +312,11 @@ declare namespace jasmine {
     }
 
     interface Reporter {
-        jasmineStarted?(runner: Runner): void;
-        jasmineDone?(suite: Suite): void;
+        name?: string;
+        jasmineStarted?(runner: { totalSpecsDefined: number }): void;
+        jasmineDone?(suite: { failedExpectations: any[] }): void;
+        suiteStarted?(suite: SpecResult): void;
+        suiteDone?(suite: SpecResult): void;
         specStarted?(spec: SpecResult): void;
         specDone?(spec: SpecResult): void;
     }
@@ -344,7 +347,8 @@ declare namespace jasmine {
         result: SpecResult;
         description: string;
         id: string;
-        getSpecName(): string;
+        getSpecName(spec: Spec): string;
+        getFullName(): string;
         userContext(): any;
     }
 
@@ -386,7 +390,6 @@ declare namespace jasmine {
         results(): NestedResults;
         add(suiteOrSpec: SuiteOrSpec): void;
         specs(): SpecResult[];
-        suites(): Suite[];
         children(): any[];
         execute(onComplete?: () => void): void;
     }

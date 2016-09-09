@@ -3,25 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Runner", "Runner\", "{78C7CA6F-6D10-4F67-9D86-25F0398D7D03}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SeleniumTestRunner", "SeleniumTestRunner\", "{78C7CA6F-6D10-4F67-9D86-25F0398D7D03}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_53994"
-		Debug.AspNetCompiler.PhysicalPath = "Runner\"
+		Debug.AspNetCompiler.PhysicalPath = "SeleniumTestRunner\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_53994\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_53994"
-		Release.AspNetCompiler.PhysicalPath = "Runner\"
+		Release.AspNetCompiler.PhysicalPath = "SeleniumTestRunner\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_53994\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "53994"
-		SlnRelativePath = "Runner\"
+		SlnRelativePath = "SeleniumTestRunner\"
 		StartServerOnDebug = "false"
 	EndProjectSection
 EndProject
