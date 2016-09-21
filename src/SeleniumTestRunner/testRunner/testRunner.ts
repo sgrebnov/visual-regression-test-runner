@@ -1,13 +1,14 @@
 ﻿import {helpers} from "../_references";
+import * as WebdriverCSS from "webdrivercss";
+import * as WebdriverIO from "webdriverio";
 import * as path from "path";
 import * as fs from "fs";
 import * as globule from "globule";
 import {jasmineTestRunner} from "./jasmineTestRunner";
 import * as testRunnerConfig from "./testRunnerConfig";
-import * as WebdriverIO from "webdriverio";
-import * as WebdriverCSS from "webdrivercss";
 import * as mkdirp from "mkdirp";
 import * as rimraf from "rimraf";
+import {initWebdriverIOEx} from "../webDriver/webdriverIOEx";
 import Config = testRunnerConfig.Config;
 import ConfigCapabilities = testRunnerConfig.ConfigCapabilities;
 
@@ -152,6 +153,7 @@ export module testRunner {
                 waitforTimeout: timeout
             }))
             .then(() => initWebdriverCSS(config, currentCapabilities))
+            .then(() => initWebdriverIOEx(browser))
             .then(() => browser.init())
             .then(() => {
                 if(config.webdriverio

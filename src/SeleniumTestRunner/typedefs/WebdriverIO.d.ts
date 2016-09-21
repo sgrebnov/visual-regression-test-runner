@@ -3,6 +3,8 @@
 // Definitions by: Nick Malaguti <https://github.com/nmalaguti/>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
+///<reference path="./node.d.ts"/>
+
 declare namespace WebdriverIO {
     // EventEmitter
     export interface Client<T> {

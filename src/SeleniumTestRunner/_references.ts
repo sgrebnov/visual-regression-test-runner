@@ -9,8 +9,11 @@
 ///<reference path="./typedefs/lodash.d.ts"/>
 ///<reference path="./typedefs/jquery.d.ts"/>
 ///<reference path="./typedefs/Promise.d.ts"/>
+
 ///<reference path="./typedefs/webdriverIO.d.ts"/>
+///<reference path="./typedefs/webdriverIOEx.d.ts"/>
 ///<reference path="./typedefs/webdriverCSS.d.ts"/>
 
 export * from "./helpers/helpers";
-export * from "./helpers/ClientContextExecutor";
+export * from "./helpers/jasmineHelpers";
+//export * from "./helpers/ClientContextExecutor";
