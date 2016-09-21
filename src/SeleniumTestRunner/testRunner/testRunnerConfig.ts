@@ -13,7 +13,7 @@ export function getDefault(): Config {
                     cleanStack: true,       // (0|false)|(1|true)|2|3 
                     verbosity: 4,        // (0|false)|1|2|(3|true)|4 
                     listStyle: 'indent', // "flat"|"indent" 
-                    activity: !helpers.isAppveyor()
+                    activity: false//!helpers.isAppveyor()
                 });
             }
         },
@@ -42,6 +42,13 @@ export function readConfig(configPath: string): Config {
     configPath = path.resolve(configPath);
     let customConfig = _.cloneDeep(<Config>require(configPath).config);
     let config = <Config>_.defaultsDeep(customConfig, getDefault(), { rootDir: path.dirname(configPath) });
+
+    if(_.isArray(config.capabilities) && config.capabilities.length > 0) {
+        config.capabilities.forEach(x => x.getDefaultName = () => x.name || x.browserName);
+    } else {
+        config.capabilities = [];
+    }
+
     return config;
 }
 
@@ -62,6 +69,7 @@ export interface Config {
 export interface ConfigCapabilities {
     name: string;
     browserName: string;
+    getDefaultName(): string;
 }
 
 export interface ConfigJasmine {

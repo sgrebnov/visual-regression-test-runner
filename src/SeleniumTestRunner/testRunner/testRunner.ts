@@ -139,8 +139,7 @@ export module testRunner {
         }
 
         function getPrefix() {
-            let currentCapabilities = config.capabilities[capabilitiesIndex];
-            return `[${currentCapabilities.name || currentCapabilities.browserName}] `;
+            return `[${config.capabilities[capabilitiesIndex].getDefaultName()}] `;
         }
     }
 
@@ -176,9 +175,8 @@ export module testRunner {
             return;
         }
 
-        let name = currentCapabilities.name || currentCapabilities.browserName;
-        let screenshotRoot = path.join(config.webdrivercss.screenshotRoot, currentCapabilities.name);
-        let failedComparisonsRoot = path.join(config.webdrivercss.failedComparisonsRoot, currentCapabilities.name);
+        let screenshotRoot = path.join(config.webdrivercss.screenshotRoot, currentCapabilities.getDefaultName());
+        let failedComparisonsRoot = path.join(config.webdrivercss.failedComparisonsRoot, currentCapabilities.getDefaultName());
 
         mkdirp.sync(screenshotRoot);
         mkdirp.sync(failedComparisonsRoot);

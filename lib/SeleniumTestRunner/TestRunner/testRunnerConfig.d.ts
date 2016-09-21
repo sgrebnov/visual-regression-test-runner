@@ -16,6 +16,7 @@ export interface Config {
 export interface ConfigCapabilities {
     name: string;
     browserName: string;
+    getDefaultName(): string;
 }
 export interface ConfigJasmine {
     defaultTimeoutInterval: number;
