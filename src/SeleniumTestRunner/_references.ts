@@ -13,3 +13,4 @@
 ///<reference path="./typedefs/webdriverCSS.d.ts"/>
 
 export * from "./helpers/helpers";
+export * from "./helpers/ClientContextExecutor";

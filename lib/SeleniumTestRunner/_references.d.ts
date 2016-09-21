@@ -12,3 +12,4 @@
 /// <reference path="../../src/SeleniumTestRunner/typedefs/webdriverIO.d.ts" />
 /// <reference path="../../src/SeleniumTestRunner/typedefs/webdriverCSS.d.ts" />
 export * from "./helpers/helpers";
+export * from "./helpers/ClientContextExecutor";
