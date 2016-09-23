@@ -3,7 +3,7 @@ var rimraf = require("rimraf");
 var runSequence = require("run-sequence")
 var builder = require("./builder");
 
-var runnerTsConfigPath = __dirname + "/src/SeleniumTestRunner/tsconfig.json";
+var runnerTsConfigPath = __dirname + "/src/visual-regression-test-runner/tsconfig.json";
 
 gulp.task("build", () => {
     return builder.build(runnerTsConfigPath);

@@ -1,1 +1,1 @@
-# SeleniumTestRunner
+# visual-regression-test-runner

@@ -1,1 +1,1 @@
-﻿module.exports = require("./lib/SeleniumTestRunner/index");
+﻿module.exports = require("./lib/visual-regression-test-runner/index");
