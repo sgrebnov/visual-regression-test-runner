@@ -43,20 +43,19 @@ export module testRunner {
 
         return initWebdriverIO(config, config.capabilities[capabilitiesIndex])
             .then(() => {
-                return browser.url(config.startPage);
+                return browser.url(config.isStartPageLocalFile() ? "file:///" + config.startPage : config.startPage);
             })
             .then(() => {
                 if(_.isArray(config.files)) {
                     let files = _.flatten(config.files.map(v => {
-                        if(url.parse(v) && url.parse(v).protocol) {
+                        if(url.parse(v) && url.parse(v).host) {
                             return v;
                         } else {
-                            if(!config.isStartPageLocalFile()) {
-                                return null;
+                            if(config.isStartPageLocalFile()) {
+                                let startPageDirName = path.dirname(config.startPage);
+                                return helpers.getFilesByGlob(v, [], config.rootDir)
+                                    .map(x => path.relative(startPageDirName, x).replace(/\\/g, "/"));
                             }
-
-                            return helpers.getFilesByGlob(v, [], config.rootDir)
-                                .map(x => path.relative(path.dirname(config.startPage), x).replace(/\\/g, "/"));
                         }
                     })).filter(x => !!x);
 
@@ -86,8 +85,8 @@ export module testRunner {
                 }
             })
             .then(() => {
-                if(_.isArray(config.injectScripts)) {
-                    let files = helpers.getFilesByGlob(config.injectScripts, [], config.rootDir);
+                if(_.isArray(config.evalFiles)) {
+                    let files = helpers.getFilesByGlob(config.evalFiles, [], config.rootDir);
                     return files.reduce((promise: Promise<any>, file: string) => {
                         return promise.then(() => {
                             let src = fs.readFileSync(file, "utf8");

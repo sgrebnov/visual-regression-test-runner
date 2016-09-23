@@ -1,5 +1,6 @@
 ﻿import * as path from "path";
 import * as fs from "fs";
+import * as url from "url";
 import {helpers} from "../_references";
 
 export function getDefault(): Config {
@@ -63,14 +64,17 @@ function setUpConfig(config: Config) {
     }
 
     if(config.startPage) {
-        if(!path.isAbsolute(config.startPage)) {
-            config.startPage = "file:///" + path.join(config.rootDir, config.startPage);
+        if(url.parse(config.startPage) && url.parse(config.startPage).host) {
+        } else {
+            config.startPage = path.isAbsolute(config.startPage)
+                ? config.startPage
+                : path.join(config.rootDir, config.startPage);
         }
     } else {
         config.startPage = path.join(__dirname, "../../../resources/blank-page.html");
     }
 
-    let isStartPageLocalFile = fs.existsSync(config.startPage)
+    let isStartPageLocalFile = fs.existsSync(config.startPage);
     config.isStartPageLocalFile = () => isStartPageLocalFile;
 }
 
@@ -85,7 +89,7 @@ export interface Config {
     startPage?: string;
     isStartPageLocalFile?(): boolean;
     waitUntil?: () => boolean;
-    injectScripts?: string[];
+    evalFiles?: string[];
     files?: string[];
     clone(): Config;
 }
