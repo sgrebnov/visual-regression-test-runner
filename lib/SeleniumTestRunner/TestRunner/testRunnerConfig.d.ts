@@ -9,8 +9,10 @@ export interface Config {
     exclude?: string[];
     capabilities?: ConfigCapabilities[];
     startPage?: string;
+    isStartPageLocalFile?(): boolean;
     waitUntil?: () => boolean;
     injectScripts?: string[];
+    files?: string[];
     clone(): Config;
 }
 export interface ConfigCapabilities {

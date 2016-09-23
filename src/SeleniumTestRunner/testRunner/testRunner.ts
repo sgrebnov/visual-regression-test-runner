@@ -2,6 +2,7 @@
 import * as WebdriverCSS from "webdrivercss";
 import * as WebdriverIO from "webdriverio";
 import * as path from "path";
+import * as url from "url";
 import * as fs from "fs";
 import * as globule from "globule";
 import {jasmineTestRunner} from "./jasmineTestRunner";
@@ -39,10 +40,49 @@ export module testRunner {
 
     function runByCapabilities(config: Config, capabilitiesIndex: number, reporters: jasmine.Reporter[]) {
         let defer = Q.defer();
+
         return initWebdriverIO(config, config.capabilities[capabilitiesIndex])
             .then(() => {
-                if(_.isString(config.startPage)) {
-                    return browser.url(config.startPage);
+                return browser.url(config.startPage);
+            })
+            .then(() => {
+                if(_.isArray(config.files)) {
+                    let files = _.flatten(config.files.map(v => {
+                        if(url.parse(v) && url.parse(v).protocol) {
+                            return v;
+                        } else {
+                            if(!config.isStartPageLocalFile()) {
+                                return null;
+                            }
+
+                            return helpers.getFilesByGlob(v, [], config.rootDir)
+                                .map(x => path.relative(path.dirname(config.startPage), x).replace(/\\/g, "/"));
+                        }
+                    })).filter(x => !!x);
+
+                    return files.reduce((promise: Promise<any>, file: string) => {
+                        return promise.then(() => {
+                            switch(path.extname(file).toLowerCase()) {
+                                case ".js": return browser.execute(function(src) {
+                                        var script = document.createElement("script");
+                                        script.src = src;
+                                        script.type = "text/javascript";
+                                        var head = document.getElementsByTagName("head")[0];
+                                        (head || document.body).appendChild(script);
+                                    }, file);
+                                case ".css": return browser.execute(function(src) {
+                                    var link = document.createElement("link");
+                                    link.href = src;
+                                    link.type = "text/css";
+                                    link.rel = "stylesheet";
+                                    var head = document.getElementsByTagName("head")[0];
+                                    (head || document.body).appendChild(link);
+                                }, file);
+                                default: return Q<any>(() => {});
+                            }
+                        });
+                    }, Q(() => {}))
+                        .then(() => browser.executeAsync(function(done) { setTimeout(done, 0); }));
                 }
             })
             .then(() => {
