@@ -1,7 +1,8 @@
 ﻿import * as path from "path";
 import * as fs from "fs";
 import * as url from "url";
-import {helpers} from "../_references";
+import * as _ from "lodash";
+//import {helpers} from "../_references";
 
 export function getDefault(): Config {
     let config: Config = {
@@ -42,13 +43,12 @@ export function getDefault(): Config {
 
 export function readConfig(configPath: string): Config {
     configPath = path.resolve(configPath);
-    let customConfig = _.cloneDeep(<Config>require(configPath).config);
-    let config = <Config>_.defaultsDeep(customConfig, getDefault(), { rootDir: path.dirname(configPath) });
-    setUpConfig(config);
-    return config;
+    return <Config>_.defaultsDeep(require(configPath), { rootDir: path.dirname(configPath) });
 }
 
-function setUpConfig(config: Config) {
+export function applyDefaults(originalConfig: Config): Config {
+    let config = <Config>_.defaultsDeep(originalConfig, getDefault());
+
     config.webdrivercss.screenshotRoot = path.isAbsolute(config.webdrivercss.screenshotRoot)
         ? config.webdrivercss.screenshotRoot
         : path.join(config.rootDir, config.webdrivercss.screenshotRoot);
@@ -76,6 +76,8 @@ function setUpConfig(config: Config) {
 
     let isStartPageLocalFile = fs.existsSync(config.startPage);
     config.isStartPageLocalFile = () => isStartPageLocalFile;
+
+    return config;
 }
 
 export interface Config {

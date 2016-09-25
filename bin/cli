@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+/* jshint node:true */
+var cli = require('../lib/visual-regression-test-runner/cli.js');
+cli.run(process.argv);

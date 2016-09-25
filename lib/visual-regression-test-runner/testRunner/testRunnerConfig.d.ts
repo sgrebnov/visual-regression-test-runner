@@ -1,5 +1,6 @@
 export declare function getDefault(): Config;
 export declare function readConfig(configPath: string): Config;
+export declare function applyDefaults(originalConfig: Config): Config;
 export interface Config {
     rootDir?: string;
     jasmine?: ConfigJasmine;

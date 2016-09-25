@@ -5,7 +5,6 @@ var mkdirp = require("mkdirp");
 var rimraf = require("rimraf");
 var path = require("path");
 var fs = require("fs");
-var path = require("path");
 var chalk = require("chalk");
 
 function build(tsconfigPath) {
@@ -67,7 +66,7 @@ function getTsconfigData(tsconfigPath) {
     return {
         files: files,
         compilerOptions: tsconfig.compilerOptions
-    }
+    };
 }
 
 function getAbsoluteOrRelativePath(targetPath, rootPath) {

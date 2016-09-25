@@ -9,6 +9,8 @@ import {jasmineTestRunner} from "./jasmineTestRunner";
 import * as testRunnerConfig from "./testRunnerConfig";
 import * as mkdirp from "mkdirp";
 import * as rimraf from "rimraf";
+import * as Q from "q";
+import * as _ from "lodash";
 import {initWebdriverIOEx} from "../webDriver/webdriverIOEx";
 import Config = testRunnerConfig.Config;
 import ConfigCapabilities = testRunnerConfig.ConfigCapabilities;
@@ -26,6 +28,9 @@ export module testRunner {
     }
 
     function runByConfig(config: Config): Promise<void> {
+
+        config = testRunnerConfig.applyDefaults(config);
+ 
         if(config.webdrivercss && isImageUpdate) {
             rimraf.sync(config.webdrivercss.screenshotRoot);
             rimraf.sync(config.webdrivercss.failedComparisonsRoot);
