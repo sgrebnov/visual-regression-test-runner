@@ -1,10 +1,10 @@
 # visual-regression-test-runner
-Test runner for visual regression testing
+Test runner for visual regression testing.
 
 ##Installation
 Install the NPM package:
 ```sh
-npm install visual-regression-test-runner https://github.com/DenisKudelin/visual-regression-test-runner.git
+npm install visual-regression-test-runner@https://github.com/DenisKudelin/visual-regression-test-runner.git
 ```
 An example repository using visual-regression-test-runner can be found [here.](https://github.com/DenisKudelin/powerbi-visuals-image-comparison-tests)
 
@@ -70,10 +70,12 @@ Here is an example test:
 ```js
 describe("Microsoft", () => {
     it("pagebodyTest", (done) => {
-        //We also able to execute any client script before taking a screenshot using the "browser.execute" method.
+        // Tests run in NodeJS context
+        // Use "browser.execute" (http://webdriver.io/api/protocol/execute.html) to run code in browser context
         browser
-            .assertAreaScreenshotMatch({ // Performs image comparison verification
-                name: "pagebody", // For example, it will be mapped to ./screenshots/originals/chrome/Microsoft/pagebodyTest.pagebody.1920px.baseline.png
+            // Statement below creates a screenshot and performs verification
+            .assertAreaScreenshotMatch({ 
+                name: "pagebody", // By default, this will be mapped to ./screenshots/originals/chrome/Microsoft/pagebodyTest.pagebody.1920px.baseline.png
                 elem: "div.row-fluid pagebody"
             })
             .then(done);
@@ -82,6 +84,8 @@ describe("Microsoft", () => {
 ```
 
 ##Usage
+
+#### Using exposed NodeJS Api
 For example, we can use the gulp to run our tests:
 ```js
 var gulp = require("gulp");
@@ -109,4 +113,9 @@ gulp install-start-selenium
 Now we can run our tests:
 ```sh
 gulp run
+```
+
+#### From command line
+```sh
+visual-regression-test-runner <path-to-config-file>
 ```
