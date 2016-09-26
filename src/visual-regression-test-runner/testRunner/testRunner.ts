@@ -95,7 +95,7 @@ export module testRunner {
                     return files.reduce((promise: Promise<any>, file: string) => {
                         return promise.then(() => {
                             let src = fs.readFileSync(file, "utf8");
-                            return browser.execute(function(code) { eval(code); }, src);
+                            return browser.execute(function(code) { eval.call(window, code); }, src);
                         });
                     }, Q(() => {}));
                 }

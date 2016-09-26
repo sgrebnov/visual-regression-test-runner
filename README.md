@@ -47,7 +47,7 @@ module.exports.config = {
     ],
 
 	// Patterns to *.js files that will be evaluated on the start page.
-    evalFiles: [
+    execFiles: [
         "../helpers/**.js",
     ],
 
