@@ -1,4 +1,6 @@
 export declare module seleniumServer {
-    function install(): Promise<{}>;
-    function run(): Promise<{}>;
+    function install(): Q.Promise<{}>;
+    function run(): Q.Promise<{}>;
+    function installRun(): Q.Promise<{}>;
+    function isStarted(): Q.Promise<any>;
 }

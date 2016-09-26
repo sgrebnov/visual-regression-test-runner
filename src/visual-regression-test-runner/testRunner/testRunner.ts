@@ -11,6 +11,7 @@ import * as mkdirp from "mkdirp";
 import * as rimraf from "rimraf";
 import * as Q from "q";
 import * as _ from "lodash";
+import {seleniumServer} from "../selenium/seleniumServer";
 import {initWebdriverIOEx} from "../webDriver/webdriverIOEx";
 import Config = testRunnerConfig.Config;
 import ConfigCapabilities = testRunnerConfig.ConfigCapabilities;
@@ -23,8 +24,13 @@ export module testRunner {
     }
 
     export function run(configPath: string): Promise<void> {
-        let config = testRunnerConfig.readConfig(configPath);
-        return runByConfig(config);
+        return seleniumServer.isStarted()
+            .then((result) => {
+                let config = testRunnerConfig.readConfig(configPath);
+                return runByConfig(config);
+            }).catch((result) => {
+                console.log(Chalk.red("Selenium server is not run! - " + result));
+            });
     }
 
     function runByConfig(config: Config): Promise<void> {
