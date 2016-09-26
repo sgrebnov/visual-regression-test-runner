@@ -12,7 +12,7 @@ export interface Config {
     startPage?: string;
     isStartPageLocalFile?(): boolean;
     waitUntil?: () => boolean;
-    evalFiles?: string[];
+    execFiles?: string[];
     files?: string[];
     clone(): Config;
 }

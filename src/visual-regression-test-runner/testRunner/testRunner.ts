@@ -90,8 +90,8 @@ export module testRunner {
                 }
             })
             .then(() => {
-                if(_.isArray(config.evalFiles)) {
-                    let files = helpers.getFilesByGlob(config.evalFiles, [], config.rootDir);
+                if(_.isArray(config.execFiles)) {
+                    let files = helpers.getFilesByGlob(config.execFiles, [], config.rootDir);
                     return files.reduce((promise: Promise<any>, file: string) => {
                         return promise.then(() => {
                             let src = fs.readFileSync(file, "utf8");
