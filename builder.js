@@ -65,8 +65,12 @@ function getTsconfigData(tsconfigPath) {
 
     return {
         files: files,
-        compilerOptions: tsconfig.compilerOptions
+        compilerOptions: convertCompilerOptions(tsconfig.compilerOptions).options
     };
+}
+
+function convertCompilerOptions(compilerOptions) {
+    return typescript.parseJsonConfigFileContent({ compilerOptions: compilerOptions, files: [] });
 }
 
 function getAbsoluteOrRelativePath(targetPath, rootPath) {
@@ -74,5 +78,5 @@ function getAbsoluteOrRelativePath(targetPath, rootPath) {
 }
 
 function isParentOrEqualPath(targetPath, parentPath) {
-    return path.normalize(targetPath).startsWith(parentPath);
+    return path.normalize(targetPath).startsWith(path.normalize(parentPath));
 }
