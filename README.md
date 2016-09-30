@@ -12,7 +12,7 @@ An example repository using visual-regression-test-runner can be found [here.](h
 The configuration file contains all necessary information to run your test suite. Here is an example configuration with all supported properties:
 ```js
 // All patterns or paths are relative to the directory where the config file resides.
-module.exports.config = {
+module.exports = {
 
     // Jasmine configuration.
     jasmine: {
@@ -92,13 +92,11 @@ var gulp = require("gulp");
 var visualRegressionTestRunner = require("visual-regression-test-runner");
 
 gulp.task("install-start-selenium", () => {
-    return visualRegressionTestRunner.seleniumServer
-        .install()
-        .then(() => visualRegressionTestRunner.seleniumServer.run());
+    return visualRegressionTestRunner.SeleniumServer.installRun();
 });
 
 gulp.task("run", () => {
-    return visualRegressionTestRunner.testRunner
+    return visualRegressionTestRunner.TestRunner
         .run("./config.js") // Path to our config file.
         .catch(() => process.exit(1))
         .then(() => process.exit(0));

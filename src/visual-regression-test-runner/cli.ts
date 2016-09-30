@@ -1,4 +1,4 @@
-﻿import {testRunner} from "./testRunner/testRunner";
+﻿import {TestRunner} from "./exports";
 
 module.exports.run = function (args: string[]) {
 
@@ -8,11 +8,13 @@ module.exports.run = function (args: string[]) {
     // remove nodejs default args
     args = args.slice(2);
 
-    if (args.length <= 0) {
-        throw new Error("Please specify location of configuration file");
+    let configPath = args[0];
+
+    if (!configPath) {
+        throw new Error("Please specify a valid location of configuration file");
     }
 
-    testRunner.run(args[0]).then(
+    TestRunner.run(args[0]).then(
         () => {
             console.log('Done');
             process.exit(0);
