@@ -9,3 +9,4 @@
 ///<reference path="./lodash.d.ts"/>
 ///<reference path="./jquery.d.ts"/>
 ///<reference path="./Promise.d.ts"/>
+///<reference path="./command-line-args.d.ts"/>

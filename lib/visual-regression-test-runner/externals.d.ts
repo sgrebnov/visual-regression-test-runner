@@ -20,3 +20,5 @@ import * as rimraf from "rimraf";
 export { rimraf };
 import * as FS from "fs";
 export { FS };
+import * as commandLineArgs from "command-line-args";
+export { commandLineArgs };

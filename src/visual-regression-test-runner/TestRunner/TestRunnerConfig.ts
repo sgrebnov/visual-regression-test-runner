@@ -38,6 +38,10 @@ export function getDefault(): Config {
 }
 
 export function readConfig(configPath: string): Config {
+    if(!configPath) {
+        throw new Error("Please specify a valid location of configuration file");
+    }
+
     configPath = Path.resolve(configPath);
     if(!FS.existsSync(configPath)) {
         throw new Error("The config file does not exist on this path");

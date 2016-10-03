@@ -1,5 +1,6 @@
 ﻿import * as seleniumStandalone from "selenium-standalone";
 import {_, Q, Path, Globule, Request, child_process, Chalk} from "../externals";
+import {Helpers} from "../exports";
 
 export module SeleniumServer {
     let seleniumChild: child_process.ChildProcess;
@@ -32,46 +33,59 @@ export module SeleniumServer {
 	 */
     export function run() {
         return isStarted()
-            .then(() => {
-                console.log(Chalk.red("Selenium server is allready run!"));
-                return Q.reject();
-            }, (err) => Q.Promise((done, fail) => {
+            .then(() => error("Selenium server is already running!"),
+                  (err) => Helpers.getJavaVersion()
+                      .then(javaVersion => {
+                          return startSelenium();
+                       }, ex => {
+                           return error("Java Runtime Environment is not installed!");
+                       })
+                  );
 
-                process.on('uncaughtException', () =>seleniumChild && seleniumChild.kill());
-                process.on("exit", () => seleniumChild && seleniumChild.kill());
+        function startSelenium() {
+            return Q.Promise((done, fail) => {
+                process.on('uncaughtException', stop);
+                process.on("exit", () => stop);
 
                 seleniumStandalone.start((error, child) => {
-
                     if (error) {
                         return fail(error);
                     }
-                    seleniumChild = child;
 
+                    seleniumChild = child;
                     done(null);
                 });
-            }));
+            });
+        }
     }
 
     /**
-	 * Installs and runs the selenium server if it is not running.
+     * Installs and runs the selenium server if it is not running.
      *
      * @return Returns the promise.
-	 */
+     */
     export function installRunIfNotRunning() {
         return isStarted().then(() => Q.resolve(undefined), () => install().then(() => run()));
     }
 
     /**
-	 * Installs and runs the selenium server.
+     * Installs and runs the selenium server.
      *
      * @return Returns the promise.
-	 */
+     */
     export function installRun() {
         return isStarted()
-                .then(() => {
-                    console.log(Chalk.red("Selenium server is already running!"));
-                    return Q.reject();
-                }, () => install().then(() => run()));
+            .then(() => error("Selenium server is already running!"),
+                  () => install().then(() => run()));
+    }
+
+    /**
+     * Stops the selenium server
+     *
+     * @return Returns the promise.
+     */
+    export function stop() {
+        return seleniumChild && seleniumChild.kill()
     }
 
     /**
@@ -91,5 +105,10 @@ export module SeleniumServer {
                 }
             });
         });
+    }
+
+    function error(errText: string) {
+        console.error(Chalk.red(errText));
+        return Q.reject();
     }
 }

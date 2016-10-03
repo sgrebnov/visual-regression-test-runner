@@ -1,5 +1,5 @@
 ﻿import {Helpers, initWebdriverIOEx} from "../exports";
-import {_, Q, Path, FS, Globule, Url, mkdirp, rimraf, Chalk} from "../externals";
+import {_, Q, Path, FS, Globule, Url, mkdirp, rimraf, Chalk, commandLineArgs} from "../externals";
 import * as WebdriverCSS from "webdrivercss";
 import * as WebdriverIO from "webdriverio";
 import {JasmineTestRunner} from "./JasmineTestRunner";
@@ -9,8 +9,6 @@ import Config = TestRunnerConfig.Config;
 import ConfigCapabilities = TestRunnerConfig.ConfigCapabilities;
 
 export module TestRunner {
-    const isImageUpdate = !!process.argv.filter(x => x && x.toLowerCase() === "--updateBaselineImages".toLowerCase())[0];
-
     /**
      * Gets the string path by the full name of the current spec.
      *
@@ -26,16 +24,46 @@ export module TestRunner {
      * @param configPath The path to config file.
      * @return Returns the promise.
      */
-    export function run(configPath: string): Promise<void> {
+    export function run(options: TestRunnerOptions): Promise<void> {
         return SeleniumServer.isStarted()
-            .then((result) => {
-                return new TestRunnerInternal(configPath).run();
-            }, (result) => {
-                console.log(Chalk.red("Selenium server is not running! - " + result));
+            .then(runTests, ex => {
+                if(options.autoRunSeleniumServer) {
+                    return SeleniumServer.installRun()
+                        .then(runTests)
+                        .finally(() => SeleniumServer.stop());
+                } else {
+                    console.log(Chalk.red("Selenium server is not running! - " + ex));
+                    throw ex;
+                }
             });
+
+        function runTests() {
+            return new TestRunnerInternal(options).run();
+        }
+    }
+
+    /**
+     * Gets test runner options from command line arguments
+     *
+     * @return Returns test runner options.
+     */
+    export function getCommandLineOptions(): TestRunnerOptions {
+         let options = commandLineArgs([
+                 { name: 'configPath', type: String, defaultOption: true },
+                 { name: 'autoRunSeleniumServer', type: Boolean },
+                 { name: 'updateBaselineImages', type: Boolean }
+             ]);
+        return options;
+    }
+
+    export interface TestRunnerOptions {
+        configPath: string;
+        autoRunSeleniumServer?: boolean;
+        updateBaselineImages?: boolean;
     }
 
     class TestRunnerInternal {
+        private options: TestRunnerOptions;
         private config: Config;
         private currentCapabilitiesIndex: number;
         private get currentCapabilities(): ConfigCapabilities {
@@ -44,8 +72,13 @@ export module TestRunner {
         private reporters: jasmine.Reporter[];
         private generalJasmineDoneResult: any;
 
-        constructor(configPath: string) {
-            this.config = TestRunnerConfig.applyDefaults(TestRunnerConfig.readConfig(configPath));
+        constructor(options: TestRunnerOptions) {
+            if(!options) {
+                throw new Error("The test runner options should be specified!");
+            }
+
+            this.options = options;
+            this.config = TestRunnerConfig.applyDefaults(TestRunnerConfig.readConfig(this.options.configPath));
         }
 
         public run() {
@@ -66,7 +99,7 @@ export module TestRunner {
         }
 
         private clearBaselineImages() {
-            if(this.config.webdrivercss && isImageUpdate) {
+            if(this.config.webdrivercss && this.options.updateBaselineImages) {
                 rimraf.sync(this.config.webdrivercss.screenshotRoot);
                 rimraf.sync(this.config.webdrivercss.failedComparisonsRoot);
             }
@@ -95,8 +128,11 @@ export module TestRunner {
                     this.addReporters();
                 })
                 .then(() => JasmineTestRunner.run(this.config.specs, this.config.exclude, this.config.rootDir)) // runs jasmine.
-                .catch((ex) => console.error(Chalk.red(ex)))
-                .fin(() => browser.endAll()); // closes the browser window.
+                .catch((ex) => { 
+                    console.error(Chalk.red(ex));
+                    throw ex;
+                })
+                .finally(() => browser.endAll()); // closes the browser window.
         }
 
         private addFileLinksOnTestPage() {

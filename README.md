@@ -2,6 +2,7 @@
 Test runner for visual regression testing.
 
 ##Installation
+Ensure that the [Java Runtime Environment](http://www.java.com) is installed.  
 Install the NPM package:
 ```sh
 npm install visual-regression-test-runner@https://github.com/DenisKudelin/visual-regression-test-runner.git
@@ -97,13 +98,16 @@ gulp.task("install-start-selenium", () => {
 
 gulp.task("run", () => {
     return visualRegressionTestRunner.TestRunner
-        .run("./config.js") // Path to our config file.
+        .run({
+            configPath: "./config.js", // Path to our config file.
+            autoRunSeleniumServer: true
+        })
         .catch(() => process.exit(1))
         .then(() => process.exit(0));
 });
 ```
 
-Before running tests we should install and start a selenium server. We can use our own selenium server or just run the command above:
+If "autoRunSeleniumServer" is not set to true, then before running tests we should install and start a selenium server. We can use our own selenium server or just run the command above:
 ```sh
 gulp install-start-selenium
 ```

@@ -11,5 +11,16 @@ export declare module TestRunner {
      * @param configPath The path to config file.
      * @return Returns the promise.
      */
-    function run(configPath: string): Promise<void>;
+    function run(options: TestRunnerOptions): Promise<void>;
+    /**
+     * Gets test runner options from command line arguments
+     *
+     * @return Returns test runner options.
+     */
+    function getCommandLineOptions(): TestRunnerOptions;
+    interface TestRunnerOptions {
+        configPath: string;
+        autoRunSeleniumServer?: boolean;
+        updateBaselineImages?: boolean;
+    }
 }

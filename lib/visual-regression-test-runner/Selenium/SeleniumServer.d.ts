@@ -25,6 +25,12 @@ export declare module SeleniumServer {
      */
     function installRun(): Q.Promise<{}>;
     /**
+     * Stops the selenium server
+     *
+     * @return Returns the promise.
+     */
+    function stop(): void;
+    /**
      * Checks if a selenium server is started.
      *
      * @return Returns the promise.
