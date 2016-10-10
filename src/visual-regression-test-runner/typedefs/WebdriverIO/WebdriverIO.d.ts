@@ -1035,6 +1035,7 @@ declare namespace WebdriverIO {
         ): Client<P>;
 
         windowHandleSize(viewport: { width: number, height: number}): Client<void>
+        windowHandlePosition(position: { x: number, y: number}): Client<void>
 
         switchTab(windowHandle?: string): Client<void>;
         switchTab<P>(

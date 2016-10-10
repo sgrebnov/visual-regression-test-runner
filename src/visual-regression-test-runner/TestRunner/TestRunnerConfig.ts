@@ -17,16 +17,16 @@ export function getDefault(): Config {
             }
         },
         webdriverio: {
-            windowSize: {
-                width: 1920,
-                height: 1080
+            viewportSize: {
+                width: 1900,
+                height: 990
             }
         },
         webdrivercss: {
             screenshotRoot: "screenshots/originals",
             failedComparisonsRoot: "screenshots/differents",
             misMatchTolerance: 0,
-            screenWidth: [1920],
+            screenWidth: [1900],
             gmOptions: {
                 appPath: require("graphics-magick-binaries").getGMBinariesPathForCurrentSystem()
             }
@@ -139,7 +139,7 @@ export interface ConfigWebdriverCssGmOptions {
 }
 
 export interface ConfigWebdriverIO {
-    windowSize?: {
+    viewportSize?: {
         width: number;
         height: number;
     }

@@ -113,6 +113,16 @@ export module TestRunner {
                         : this.config.startPage;
                     return browser.url(startPage);
                 })
+                .then(() => this.getWindowScreen().then(screen => {
+                    console.log(Chalk.gray(
+                        `Screen resolution: ${screen.width}x${screen.height}. ` +
+                        `Available size: ${screen.availWidth}x${screen.availHeight}`));
+                }))
+                .then(() => this.getWindowSize().then(size => {
+                    console.log(Chalk.gray(
+                        `Inner size: ${size.innerWidth}x${size.innerHeight}. ` +
+                        `Outer size: ${size.outerWidth}x${size.outerHeight}`));
+                }))
                 .then(() => this.addFileLinksOnTestPage()) // adds css/script links.
                 .then(() => this.executeFilesOnTestPage()) // executes scripts.
                 .then(() => { // waits until the page is not ready for testing.
@@ -129,10 +139,53 @@ export module TestRunner {
                 })
                 .then(() => JasmineTestRunner.run(this.config.specs, this.config.exclude, this.config.rootDir)) // runs jasmine.
                 .catch((ex) => { 
-                    console.error(Chalk.red(ex));
+                    console.log(Chalk.red("Error: " + JSON.stringify(ex)));
                     throw ex;
                 })
-                .finally(() => browser.endAll()); // closes the browser window.
+                .finally(() => browser.endAll().catch(ex => {
+                    if(ex && ex["seleniumStack"]) { //supresses an unknown error on appveyor
+                        let seleniumStack = ex["seleniumStack"];
+                        if(seleniumStack
+                            && seleniumStack["type"] === "UnknownError"
+                            && seleniumStack["orgStatusMessage"] === "Can't obtain updateLastError method for class com.sun.jna.Native") {
+                            return;
+                        }
+                    }
+
+                    console.log(Chalk.red("Error: " + JSON.stringify(ex)));
+                    throw ex;
+                })); // closes the browser window.
+        }
+
+        private getWindowScreen() {
+            return browser
+                .execute(function(){ 
+                    return JSON.stringify((function(obj) {
+                        var ret = {};
+                        for (var i in obj) {
+                            ret[i] = obj[i];
+                        }
+                        return ret;
+                    })(screen))})
+                .then(result => <Screen>JSON.parse(result.value));
+        }
+
+        private getWindowSize() {
+            return browser
+                .execute(function(){
+                    return { 
+                        innerWidth: window.innerWidth,
+                        innerHeight: window.innerHeight,
+                        outerWidth: window.outerWidth,
+                        outerHeight: window.outerHeight
+                     };
+                })
+                .then(result => <{
+                    innerWidth: number,
+                    innerHeight: number,
+                    outerWidth: number,
+                    outerHeight: number
+                }>result.value);
         }
 
         private addFileLinksOnTestPage() {
@@ -267,10 +320,12 @@ export module TestRunner {
                 .then(() => browser.init()) // initializes the webdriverio client.
                 .then(() => { // sets a window size.
                     if(this.config.webdriverio
-                        && this.config.webdriverio.windowSize
-                        && this.config.webdriverio.windowSize.width > 0
-                        && this.config.webdriverio.windowSize.height > 0) {
-                        return browser.windowHandleSize(this.config.webdriverio.windowSize);
+                        && this.config.webdriverio.viewportSize
+                        && this.config.webdriverio.viewportSize.width > 0
+                        && this.config.webdriverio.viewportSize.height > 0) {
+                        return browser
+                            .setViewportSize(this.config.webdriverio.viewportSize, true)
+                            .windowHandlePosition({ x: 0, y: 0 });
                     }
                 })
                 .then(() => browser // sets a timeout.
@@ -281,7 +336,8 @@ export module TestRunner {
                     .timeoutsImplicitWait(timeout)
                 );
         }
-        
+
+
         private initWebdriverCSS() {
             if(!this.config.webdrivercss) {
                 return;

@@ -41,7 +41,7 @@ export interface ConfigWebdriverCssGmOptions {
     appPath: string;
 }
 export interface ConfigWebdriverIO {
-    windowSize?: {
+    viewportSize?: {
         width: number;
         height: number;
     };
