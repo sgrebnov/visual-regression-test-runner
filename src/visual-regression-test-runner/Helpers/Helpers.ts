@@ -7,6 +7,12 @@ export module Helpers {
             : (<any>isAppveyor).isAppveyor;
     }
 
+    export function promiseSequence(...args: (Promise<any> | any)[]): Promise<any> {
+        return args.reduce((previous: Promise<any>, current: any) => {
+            return previous.then(() => current);
+        }, Q(() => {}));
+    }
+
     export function getFilesByGlob(glob: string[] | string, excludeGlob?: string[] | string, rootDir?: string) {
         let files: string[] = Globule.find(glob || [], { srcBase: rootDir });
         if(excludeGlob) {
@@ -19,6 +25,15 @@ export module Helpers {
             });
         }
         return files.map(x => Path.isAbsolute(x) ? x : Path.join(rootDir, x));
+    }
+
+    export function JSONstringifyProto(value: any) {
+        var res = {};
+        for (var i in value) {
+            res[i] = value[i];
+        }
+
+        return JSON.stringify(res);
     }
 
     export function getJavaVersion() {

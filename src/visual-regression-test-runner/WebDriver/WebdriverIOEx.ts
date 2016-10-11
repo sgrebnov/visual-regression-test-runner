@@ -1,16 +1,99 @@
-﻿import {JasmineHelpers, TestRunner} from "../exports";
+﻿import {JasmineHelpers, TestRunner, Helpers} from "../exports";
+import {_, Q} from "../externals";
 
 // adds additional helper methods to webdriverio.
 export function initWebdriverIOEx(client: WebdriverIO.Client<any>) {
-    client.addCommand("assertAreaScreenshotMatch", ((options: WebdriverCSS.Options) => {
-        let pageName = TestRunner.getCurrentSpecPath();
+    return Helpers.promiseSequence(
+        addCommand("assertAreaScreenshotMatch", (options: WebdriverCSS.Options) => {
+            let pageName = TestRunner.getCurrentSpecPath();
+            return client
+                .webdrivercss(pageName, options)
+                .then(result => {
+                    return JasmineHelpers.webdriverCSSMatch(result);
+                });
+        }),
+        replaceCommand("execute", function execute(script: string | Function, ...args: any[]) {
+            return executeClientTryCatchedScript(script,
+                s => (<any>execute).original.apply(client, [s].concat(args)));
+        }),
+        replaceCommand("selectorExecute", function selectorExecute(
+            selectors: string | string[],
+            script: string | Function,
+            ...args: any[]) {
+            return executeClientTryCatchedScript(script,
+                s => (<any>selectorExecute).original.apply(client, [selectors, s].concat(args)));
+        })
+    );
 
-        return client
-            .webdrivercss(pageName, options)
-            .then(result => {
-                return JasmineHelpers.webdriverCSSMatch(result);
-            });
-    }).bind(client), true);
+    function executeClientTryCatchedScript(
+        script: string | Function,
+        fn: (script: string | Function) => WebdriverIO.Client<WebdriverIO.RawResult<any>>) {
+        const key = "webdriverioClientTryCatchedScript";
+        const keyMessage = key + "ErrorMessage";
+        const keyStack = key + "ErrorStack";
+        const consoleMessages = key + "ConsoleMessages";
+
+        script = getTryCatchedScript(script);
+        return fn(script).then(result => {
+            throwClientError(result);
+            return result;
+        });
+
+        function getTryCatchedScript(script: string | Function) {
+            if (typeof script === 'string' || typeof script === 'function') {
+                if (typeof script === 'function' || script.trim().indexOf('function') === 0) {
+                    script = `return (${script}).apply(null, arguments)`;
+                }
+
+                script = `return (function ${key}() {
+                                try {
+                                    ${script};
+                                } catch(error) {
+                                    return { 
+                                        ${keyMessage}: (error instanceof Error) ? error.message : error,
+                                        ${keyStack}: (error instanceof Error) ? error.stack : "Error: " + error
+                                    };
+                                }
+                            }).apply(this, arguments)`;
+            }
+
+            return script;
+        }
+
+        function throwClientError(result: WebdriverIO.RawResult<any>) {
+            if(!result.value || !result.value.hasOwnProperty(keyMessage) || !result.value.hasOwnProperty(keyStack)) {
+                return;
+            }
+
+            let splitStack = (<string>result.value[keyStack] || "").split("\n");
+            if(splitStack.length > 6) {
+                let endIndex = _.findIndex(splitStack, (line: string) => _.startsWith(_.trimStart(line), "at " + key));
+                if(endIndex >= 0) {
+                    splitStack =  splitStack.splice(0, splitStack.length - endIndex - 1);
+                }
+
+                splitStack.splice(1,1);
+            }
+
+            let targetStack = "[CLIENT SIDE CODE] " + splitStack.join("\n");
+            let error = new Error(result.value[keyMessage]);
+            try{throw error;}catch(ex){}
+            Object.defineProperty(error, "stack", { get: () => targetStack})
+            throw error;
+        }
+    }
+
+    function addCommand(commandName: string, customMethod: Function) {
+        return client.addCommand(commandName, customMethod.bind(client), true);
+    }
+
+    function replaceCommand(commandName: string, customMethod: Function) {
+        let originalMethod = client[commandName];
+        if(!originalMethod.original) {
+            (<any>customMethod).original = originalMethod;
+            return client.addCommand(commandName,  customMethod.bind(client), true);
+        }
+    }
 }
 
 export module WebdriverIOEx {

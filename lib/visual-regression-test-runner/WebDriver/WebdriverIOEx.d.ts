@@ -1,4 +1,4 @@
-export declare function initWebdriverIOEx(client: WebdriverIO.Client<any>): void;
+export declare function initWebdriverIOEx(client: WebdriverIO.Client<any>): Promise<any>;
 export declare module WebdriverIOEx {
     enum Browser {
         chrome,
