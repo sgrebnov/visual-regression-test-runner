@@ -161,7 +161,7 @@ declare namespace jasmine {
         versionString(): string;
         nextSpecId(): number;
         addReporter(reporter: Reporter): void;
-        execute(): void;
+        execute(runnablesToRun?: string[]): void;
         describe(description: string, specDefinitions: () => void): Suite;
         // ddescribe(description: string, specDefinitions: () => void): Suite; Not a part of jasmine. Angular team adds these
         beforeEach(beforeEachFunction: () => void): void;
@@ -218,6 +218,8 @@ declare namespace jasmine {
         getItems(): Result[];
         addResult(result: Result): void;
         passed(): boolean;
+        failedExpectations: any[];
+        onException(error: any): void;
     }
 
     interface MessageResult extends Result  {
@@ -362,6 +364,10 @@ declare namespace jasmine {
         description: string;
         start: number;
         type: string;
+        disable(): void;
+        pend(message?: string): void;
+        status(enabled?: boolean): string;
+        getResult(): NestedResults;
     }
 
     interface SpecResult extends SuiteOrSpec {
@@ -377,21 +383,19 @@ declare namespace jasmine {
 
     interface Suite extends SuiteOrSpec {
 
-        new (env: Env, description: string, specDefinitions: () => void, parentSuite: Suite): any;
+        //new (env: Env, description: string, specDefinitions: () => void, parentSuite: Suite): any;
 
         parentSuite: Suite;
 
         getFullName(): string;
-        finish(onComplete?: () => void): void;
         beforeEach(beforeEachFunction: SpecFunction): void;
         afterEach(afterEachFunction: SpecFunction): void;
         beforeAll(beforeAllFunction: SpecFunction): void;
         afterAll(afterAllFunction: SpecFunction): void;
-        results(): NestedResults;
-        add(suiteOrSpec: SuiteOrSpec): void;
-        specs(): SpecResult[];
-        children(): any[];
-        execute(onComplete?: () => void): void;
+        
+        addChild(suiteOrSpec: SuiteOrSpec): void;
+
+        children: SuiteOrSpec[];
     }
 
     interface XSuite {

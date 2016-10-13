@@ -3,7 +3,7 @@
 ///<reference path="./rimraf.d.ts"/>
 ///<reference path="./request.d.ts"/>
 ///<reference path="./globule.d.ts"/>
-///<reference path="./jasmine.d.ts"/>
+///<reference path="./Jasmine/jasmine.d.ts"/>
 ///<reference path="./Q.d.ts"/>
 ///<reference path="./chalk.d.ts"/>
 ///<reference path="./lodash.d.ts"/>

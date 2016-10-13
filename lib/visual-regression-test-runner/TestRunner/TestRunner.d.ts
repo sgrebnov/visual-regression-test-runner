@@ -1,4 +1,12 @@
+import * as TestRunnerConfig from "./TestRunnerConfig";
+import { SeleniumServer } from "../selenium/seleniumServer";
 export declare module TestRunner {
+    /**
+     * Gets the current config.
+     *
+     * @return Returns the config.
+     */
+    function getCurrentConfig(): TestRunnerConfig.Config;
     /**
      * Gets the string path by the full name of the current spec.
      *
@@ -11,7 +19,7 @@ export declare module TestRunner {
      * @param configPath The path to config file.
      * @return Returns the promise.
      */
-    function run(options: TestRunnerOptions): Promise<void>;
+    function run(options: TestRunnerOptions): Promise<any>;
     /**
      * Gets test runner options from command line arguments
      *
@@ -22,5 +30,7 @@ export declare module TestRunner {
         configPath: string;
         autoRunSeleniumServer?: boolean;
         updateBaselineImages?: boolean;
+        seleniumServerOptions?: SeleniumServer.Options;
     }
+    function logError(error: any): any;
 }

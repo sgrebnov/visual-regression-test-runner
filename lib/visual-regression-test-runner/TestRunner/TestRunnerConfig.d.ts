@@ -7,14 +7,18 @@ export interface Config {
     webdriverio?: ConfigWebdriverIO;
     webdrivercss: ConfigWebdriverCss;
     specs?: string[];
-    exclude?: string[];
     capabilities?: ConfigCapabilities[];
     startPage?: string;
-    isStartPageLocalFile?(): boolean;
     waitUntil?: () => boolean;
     execFiles?: string[];
+    initTestMode: InitTestMode;
     files?: string[];
     clone(): Config;
+}
+export declare enum InitTestMode {
+    BeforeEach,
+    BeforeAll,
+    Manually,
 }
 export interface ConfigCapabilities {
     name: string;

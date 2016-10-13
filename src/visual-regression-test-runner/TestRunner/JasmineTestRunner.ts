@@ -1,50 +1,60 @@
 ﻿import {_, Q, Path, Globule, Chalk} from "../externals";
-import {Helpers} from "../exports";
+import {Helpers, JasmineRequire} from "../exports";
 
 export module JasmineTestRunner {
-    let currentSpec: jasmine.Spec;
-    export let specBeforeExecute: (spec: jasmine.Spec) => void;
-
     export function init() {
-        let jasmineRequire = require("jasmine-core/lib/jasmine-core/jasmine");
-
-        (<any>global).jasmine = jasmineRequire.core(jasmineRequire);
-        let jasmineInterface = jasmineRequire.interface(jasmine, jasmine.getEnv());
+        let jasmine = JasmineRequire.core(JasmineRequire);
+        let jasmineInterface = JasmineRequire.interface(jasmine, jasmine.getEnv());
         for (let property in jasmineInterface) {
             global[property] = jasmineInterface[property];
         }
-
-        let execute = (<any>jasmine).Spec.prototype.execute;
-        (<any>jasmine).Spec.prototype.execute = function (...args) {
-            currentSpec = <jasmine.Spec>this;
-            if(specBeforeExecute) {
-                specBeforeExecute(this);
-            }
-
-            return execute.apply(this, args)
-        }
     }
 
-    export function run(filesGlob: string[] | string, excludeGlob: string[] | string, rootDir?: string) {
-        let files = Helpers.getFilesByGlob(filesGlob, excludeGlob, rootDir);
+    export function loadRunnables<T>(
+        files: string[],
+        values: T[],
+        getName: (value: T) => string,
+        beforeSuite?: (value: T)  => void) {
+
+        let result: jasmine.Suite[] = [];
+        for(let value of values) {
+            let suite: jasmine.Suite = <any>describe(getName(value), () => {
+                beforeSuite && beforeSuite(value);
+                files.forEach(require);
+
+                //We have to remove all required specs from the require.cache
+                //to get the ability to add all suites again.
+                files.forEach(file => { delete require.cache[require.resolve(file)]; }); 
+            });
+
+            result.push(suite);
+        }
+
+        return result;
+    }
+
+    export function execute(runnablesToRun?: jasmine.Suite | jasmine.Suite[]) {
+        let runnablesIdToRun: string[] = runnablesToRun
+            ? _.isArray(runnablesToRun) ?  runnablesToRun.map(x => x.id) : [runnablesToRun.id]
+            : undefined;
 
         let defer = Q.defer();
         jasmine.getEnv().addReporter({
             jasmineDone: (value) => {
-                if(files && files.length > 0) {
-                    files.forEach(file => { delete require.cache[require.resolve(file)]; });//We have to remove all required specs from the require.cache
-                }                                                                           //to get the ability to add all suites to a new instance of jasmine again.
-
-                defer.resolve(value);
+                let failedExpectations = _.flatten(jasmine.getEnv().topSuite().getAllChildren()
+                    .map(x => x.getResult().failedExpectations));
+                value.failedExpectations = failedExpectations;
+                setTimeout(() => {
+                    if(value.failedExpectations.length > 0){
+                        defer.reject(value);
+                    } else {
+                        defer.resolve(value);
+                    }
+                }, 1);
             }
         });
 
-        files.forEach(require);
-        jasmine.getEnv().execute();
+        jasmine.getEnv().execute(runnablesIdToRun);
         return defer.promise;
-    }
-
-    export function getCurrentSpecResult() {
-        return currentSpec && currentSpec.result;
     }
 }

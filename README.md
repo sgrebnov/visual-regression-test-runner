@@ -25,11 +25,6 @@ module.exports = {
         "./lib/tests/**/*Tests.js",
     ],
 
-	// Patterns of test files that will not be run.
-    exclude: [
-	    "./lib/tests/**/*NotTests.js"
-	],
-
 	// [REQUIRED] Browser list to run tests. All specs will be launched for each browser.
     capabilities: [{
         browserName: "chrome"
@@ -70,16 +65,15 @@ To write tests we use Jasmine test framework. To access the browser functions we
 Here is an example test:
 ```js
 describe("Microsoft", () => {
-    it("pagebodyTest", (done) => {
+    it("pagebodyTest", () => {
         // Tests run in NodeJS context
         // Use "browser.execute" (http://webdriver.io/api/protocol/execute.html) to run code in browser context
-        browser
+        return jasmine.WDClient
             // Statement below creates a screenshot and performs verification
             .assertAreaScreenshotMatch({ 
                 name: "pagebody", // By default, this will be mapped to ./screenshots/originals/chrome/Microsoft/pagebodyTest.pagebody.1920px.baseline.png
                 elem: "div.row-fluid pagebody"
-            })
-            .then(done);
+            });
     });
 });
 ```

@@ -2,8 +2,8 @@
   import * as child_process from 'child_process';
   export interface DriverConfig {
     version: string;
-    arch: string;
-    baseURL: string;
+    arch?: string;
+    baseURL?: string;
   }
   export interface InstallOpts {
     /** Selenium version to install. */
@@ -38,6 +38,8 @@
   export function install(opts: InstallOpts, cb: (error?: any) => void): void;
 
   export interface StartOpts {
+    version?: string;
+
     drivers?: {
       [browserName: string]: DriverConfig;
       // chrome?: DriverConfig;

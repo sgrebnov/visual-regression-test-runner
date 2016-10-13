@@ -1,39 +1,26 @@
-﻿import {_, Q, Path, Globule, Chalk, child_process} from "../externals";
+﻿import {_, Q, Path, Globule, Chalk, child_process, Url, FS} from "../externals";
 
 export module Helpers {
     export function isAppveyor(): boolean {
-        return (<any>isAppveyor).isAppveyor === undefined
-            ? ((<any>isAppveyor).isAppveyor = require('is-appveyor'))
-            : (<any>isAppveyor).isAppveyor;
+        return 'CI' in process.env && 'APPVEYOR' in process.env;
     }
 
-    export function promiseSequence(...args: (Promise<any> | any)[]): Promise<any> {
-        return args.reduce((previous: Promise<any>, current: any) => {
-            return previous.then(() => current);
-        }, Q(() => {}));
+    export function isVSO() {
+        return 'agent.jobstatus' in process.env
+            && 'AGENT_ID' in process.env
+            && 'AGENT_MACHINENAME' in process.env
+            && 'AGENT_NAME' in process.env;
     }
 
-    export function getFilesByGlob(glob: string[] | string, excludeGlob?: string[] | string, rootDir?: string) {
+    export function callInSequence(sequence: ((value?: any) => Promise<any>)[]): Promise<any> {
+        return sequence.reduce((previous: Promise<any>, current: (value?: any) => Promise<any>) => {
+            return previous.then(current);
+        }, Q());
+    }
+
+    export function getFilesByGlob(glob: string[] | string, rootDir?: string) {
         let files: string[] = Globule.find(glob || [], { srcBase: rootDir });
-        if(excludeGlob) {
-            if(!_.isArray(excludeGlob)) {
-                excludeGlob = <any>[excludeGlob];
-            }
-
-            files = files.filter(file => {
-                 return !Globule.isMatch(excludeGlob, file, { srcBase: rootDir });
-            });
-        }
         return files.map(x => Path.isAbsolute(x) ? x : Path.join(rootDir, x));
-    }
-
-    export function JSONstringifyProto(value: any) {
-        var res = {};
-        for (var i in value) {
-            res[i] = value[i];
-        }
-
-        return JSON.stringify(res);
     }
 
     export function getJavaVersion() {
@@ -54,5 +41,49 @@ export module Helpers {
         });
 
         return deffer.promise;
+    }
+
+    export function setScreenResolution(width: number, height: number) {
+        return executePSCommands([,
+            removeBOMSymbol(FS.readFileSync(Path.join(__dirname, "./set-screenresolution.ps1"), "utf8")),
+            `Set-ScreenResolution ${1920} ${1080}`])
+            .then((result) => {
+                if(!result.output[0] || result.errors.length > 0 || _.trimEnd(result.output[0]) !== "Success") {
+                    throw new Error("Set-ScreenResolution Error" + JSON.stringify(result));
+                }
+            });
+    }
+
+    export function removeBOMSymbol(content: string): string {
+        return content && content.replace(/^\uFEFF/, "");
+    }
+
+    export function executePSCommands(commands: string[] | string) {
+        let defer = Q.defer<PowerShellResult>();
+        var result: PowerShellResult = { output: [], errors: [] };
+        var child = child_process.spawn("powershell.exe",
+            ["-ExecutionPolicy", "unrestricted", "-Command", "-"]);
+        child.on("exit", () => defer.resolve(result));
+        child.on("error", defer.reject);
+
+        child.stdout.on("data", (data) => {
+            result.output.push(data.toString());
+        });
+        child.stderr.on("data", (data) => {
+            result.errors.push(data.toString());
+        });
+
+        (_.isArray(commands) ? commands : [commands]).forEach((cmd) => {
+            let base64Command = new Buffer(cmd, "utf8").toString("base64");
+            child.stdin.write(`iex ([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("${base64Command}")))\n`);
+        });
+        child.stdin.end();
+
+        return defer.promise;
+    }
+
+    export interface PowerShellResult {
+        output: string[];
+        errors: string[];
     }
 }

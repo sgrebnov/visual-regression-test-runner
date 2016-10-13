@@ -13,7 +13,7 @@ function build(tsconfigPath) {
     var program = typescript.createProgram(tsconfig.files, _.extend({}, tsconfig.compilerOptions));
     var emitResult = program.emit(undefined, (fileName, data) => {
         var targetPath = getAbsoluteOrRelativePath(fileName, __dirname);
-        if (tsconfig.compilerOptions.outDir && !isParentOrEqualPath(targetPath, tsconfig.compilerOptions.outDir)) {
+        if (tsconfig.outDir && !isParentOrEqualPath(targetPath, tsconfig.outDir)) {
             return;
         }
 
@@ -23,12 +23,21 @@ function build(tsconfigPath) {
 
     var allDiagnostics = typescript.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
     allDiagnostics.forEach(diagnostic => {
+        if (!diagnostic.file) {
+            console.log(chalk.red("Compilation error: " + diagnostic.messageText));
+            return;
+        }
+
         var lc = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
         var message = typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
         console.log(chalk.red("Compilation error: "
             + diagnostic.file.fileName + " " + (lc.line + 1) + ", " + (lc.character + 1)
             + " " + message));
     });
+
+    tsconfig.copyFiles.forEach(file => fs.writeFileSync(
+        path.join(tsconfig.outDir, file),
+        fs.readFileSync(getAbsoluteOrRelativePath(file, tsconfig.rootDir))));
 
     return allDiagnostics.length === 0;
 }
@@ -43,14 +52,17 @@ module.exports.clean = clean;
 
 function getTsconfigData(tsconfigPath) {
     var rootDir = path.dirname(tsconfigPath);
+    var outDir = rootDir;
     var tsconfig = require(tsconfigPath);
-
-    if (tsconfig.compilerOptions.rootDir) {
-        tsconfig.compilerOptions.rootDir = getAbsoluteOrRelativePath(tsconfig.compilerOptions.rootDir, rootDir);
-    }
 
     if (tsconfig.compilerOptions.outDir) {
         tsconfig.compilerOptions.outDir = getAbsoluteOrRelativePath(tsconfig.compilerOptions.outDir, rootDir);
+        outDir = tsconfig.compilerOptions.outDir;
+    }
+
+    if (tsconfig.compilerOptions.rootDir) {
+        tsconfig.compilerOptions.rootDir = getAbsoluteOrRelativePath(tsconfig.compilerOptions.rootDir, rootDir);
+        rootDir = tsconfig.compilerOptions.rootDir;
     }
 
     var files = [];
@@ -65,6 +77,11 @@ function getTsconfigData(tsconfigPath) {
 
     return {
         files: files,
+        rootDir: rootDir,
+        outDir: outDir,
+        copyFiles: _.isArray(tsconfig.copyFilesGlob)
+            ? globule.find(tsconfig.copyFilesGlob, { srcBase: rootDir })
+            : [],
         compilerOptions: convertCompilerOptions(tsconfig.compilerOptions).options
     };
 }

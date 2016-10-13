@@ -1,4 +1,5 @@
 ﻿import {_, Q, Path, Url, FS, Chalk} from "../externals";
+import {Helpers} from "../exports";
 
 export function getDefault(): Config {
     let config: Config = {
@@ -8,11 +9,11 @@ export function getDefault(): Config {
                 let JasmineConsoleReporter = require('jasmine-console-reporter');
 
                 return new JasmineConsoleReporter({
-                    colors: 2,           // (0|false)|(1|true)|2 
+                    colors: Helpers.isVSO() ? 0 : 2,           // (0|false)|(1|true)|2 
                     cleanStack: true,       // (0|false)|(1|true)|2|3 
                     verbosity: 4,        // (0|false)|1|2|(3|true)|4 
                     listStyle: 'indent', // "flat"|"indent" 
-                    activity: false//!helpers.isAppveyor()
+                    activity: false //!helpers.isAppveyor()
                 });
             }
         },
@@ -31,6 +32,7 @@ export function getDefault(): Config {
                 appPath: require("graphics-magick-binaries").getGMBinariesPathForCurrentSystem()
             }
         },
+        initTestMode: InitTestMode.BeforeAll,
         clone: () => _.cloneDeep(config),
     }
 
@@ -51,10 +53,17 @@ export function readConfig(configPath: string): Config {
     try {
         config = require(configPath);
         if(!config) {
-            throw new Error();
+            throw new Error(JSON.stringify(config));
         }
-    } catch(ex) {
-        throw new Error("The config file has an invalid format");
+    } catch(error) {
+        const text = "The config file has an invalid format ";
+        if(error instanceof Error) {
+            error.message = text + error.message;
+        } else {
+            error = new Error(text + error);
+        }
+
+        throw error;
     }
 
     return <Config>_.defaultsDeep(config, { rootDir: Path.dirname(configPath) });
@@ -77,20 +86,6 @@ export function applyDefaults(originalConfig: Config): Config {
         config.capabilities = [];
     }
 
-    if(config.startPage) {
-        if(Url.parse(config.startPage) && Url.parse(config.startPage).host) {
-        } else {
-            config.startPage = Path.isAbsolute(config.startPage)
-                ? config.startPage
-                : Path.join(config.rootDir, config.startPage);
-        }
-    } else {
-        config.startPage = Path.join(__dirname, "../../../resources/blank-page.html");
-    }
-
-    let isStartPageLocalFile = FS.existsSync(config.startPage);
-    config.isStartPageLocalFile = () => isStartPageLocalFile;
-
     return config;
 }
 
@@ -100,14 +95,19 @@ export interface Config {
     webdriverio?: ConfigWebdriverIO;
     webdrivercss: ConfigWebdriverCss;
     specs?: string[];
-    exclude?: string[];
     capabilities?: ConfigCapabilities[];
     startPage?: string;
-    isStartPageLocalFile?(): boolean;
     waitUntil?: () => boolean;
     execFiles?: string[];
+    initTestMode: InitTestMode;
     files?: string[];
     clone(): Config;
+}
+
+export enum InitTestMode {
+    BeforeEach = <any>"BeforeEach",
+    BeforeAll = <any>"BeforeAll",
+    Manually = <any>"Manually"
 }
 
 export interface ConfigCapabilities {

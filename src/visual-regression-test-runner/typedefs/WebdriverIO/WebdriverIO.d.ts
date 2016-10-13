@@ -1071,6 +1071,8 @@ declare namespace WebdriverIO {
         coloredLogs?: boolean;
         logLevel?: string;
         baseUrl?: string;
+        host: string;
+        port: number;
         desiredCapabilities?: DesiredCapabilities;
     }
 
@@ -1083,7 +1085,7 @@ declare namespace WebdriverIO {
     export function multiremote(options?: MultiremoteOptions): Client<void>;
 }
 
-declare var browser: WebdriverIO.Client<void>;
+//declare var browser: WebdriverIO.Client<void>;
 
 declare module "webdriverio" {
     export = WebdriverIO;
